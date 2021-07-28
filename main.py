@@ -1,11 +1,13 @@
-from controllers.crawler import get_html_from_url, scrape_page
+from controllers.crawler import check_cookies_banner_exists, get_html_from_url, scrape_page, web_scrape_city
 import pandas as pd
 from dotenv import load_dotenv
+from selenium import webdriver
 
 load_dotenv()
 
 base_url = 'https://www.tripadvisor.com.br'
 tourist_spots = []
+driver = webdriver.Chrome("C:\Program Files (x86)\Chromedriver\chromedriver.exe")
 
 cities = {
     # 'Santo André': 'https://www.tripadvisor.com.br/Attractions-g303624-Activities-Santo_Andre_State_of_Sao_Paulo.html',
@@ -17,25 +19,29 @@ cities = {
     # 'Rio Grande da Serra': 'https://www.tripadvisor.com.br/Attractions-g2346575-Activities-Rio_Grande_Da_Serra_State_of_Sao_Paulo.html'
 }
 
-for city in cities:
-    urls = [cities[city]]
-    print(urls)
-    # Obter HTML da página da cidade no Tripadvisor
-    soup = get_html_from_url(cities.get(city))
+tourist_spots = web_scrape_city(cities['São Bernardo do Campo'], driver)
 
-    # Obter as páginas para pegar mais resultados (limite de 30 locais por página)
-    pages = soup.find(
-        'div', {'class': '_2SeCgktb'}).find_all('a')
-    print(pages)
-    for page in pages:
-        urls.append(base_url + page.get('href'))
+driver.close()
 
-    # Iterar nas URLs das páginas e guardar em uma lista
-    print(urls)
-    for url in urls:
-        tourist_spots.extend(scrape_page(url, base_url))
+# for city in cities:
+#     urls = [cities[city]]
+#     print(urls)
+#     # Obter HTML da página da cidade no Tripadvisor
+#     soup = get_html_from_url(cities.get(city))
 
-    print(city + ' done')
+#     # Obter as páginas para pegar mais resultados (limite de 30 locais por página)
+#     pages = soup.find(
+#         'div', {'class': '_2SeCgktb'}).find_all('a')
+#     print(pages)
+#     for page in pages:
+#         urls.append(base_url + page.get('href'))
+
+#     # Iterar nas URLs das páginas e guardar em uma lista
+#     print(urls)
+#     for url in urls:
+#         tourist_spots.extend(scrape_page(url, base_url))
+
+#     print(city + ' done')
 
 # Criando um DataFrame com os resultados
 dataset = pd.DataFrame(tourist_spots)

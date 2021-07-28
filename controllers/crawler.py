@@ -1,12 +1,63 @@
 from urllib.request import urlopen, Request
+from selenium.common.exceptions import NoSuchElementException
 from bs4 import BeautifulSoup
+import time
 
 from .places import get_place_details
 
-# def get_base_url(url):
-#     parsed_uri = urlparse(cities.get(city))
-#     base_url = '{uri.scheme}://{uri.netloc}/'[:-1].format(uri=parsed_uri)
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'}
+MAX_PAGES = 2
+
+def web_scrape_city(url, driver):
+    spots = []
+    driver.get(url)
+    check_cookies_banner_exists(driver)
+
+    try:
+        for page in range(0, MAX_PAGES):
+            time.sleep(2)
+            print('Page')
+            card_containers = driver.find_elements_by_xpath(".//div[@data-automation='cardWrapper']")
+
+            # card_container = driver.find_elements_by_xpath("//div[@data-automation='cardWrapper']")
+            # for i in range(len(card_container)):
+            #     print(i)
+
+            for card_index in range(len(card_containers)):
+                tourist_spot = get_place_information(card_containers[card_index])
+                spots.append(tourist_spot)
+            
+            time.sleep(2)
+            driver.find_element_by_xpath("//a[@aria-label='Próxima página']").click()
+    except NoSuchElementException:
+        print('No more pages found')
+    except Exception as e:
+        print('Error ' + e)
+    return spots
+
+def check_cookies_banner_exists(driver):
+    time.sleep(3)
+    try:
+        driver.find_element_by_xpath("//button[@class='evidon-banner-acceptbutton']").click()
+    except:
+        print('No cookies banner found')
+    return
+
+def get_place_information(card):
+    local = {}
+
+    # Obter nome
+    local['name'] = card.find_element_by_xpath(".//span[@name='title']").text.split('.')[-1].strip()
+    print(local['name'])
+    # Obter categorias
+    # local['category'] = card.find(
+    #     'div', {'class': 'DrjyGw-P _26S7gyB4 _3SccQt-T'}).get_text().split(' • ') or []
+    # local['category'] = ','.join(local['category'])
+
+    # # Obter uma imagem
+    # image = card.find('img')
+    # local['image'] = image.get('src') if image != None else ''
+
+    return local
 
 def get_html_from_url(url):
     # Acessando a URL da página

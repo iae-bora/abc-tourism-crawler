@@ -1,13 +1,17 @@
 from controllers.crawler import web_scrape_city_pages
 import pandas as pd
+import os
 from dotenv import load_dotenv
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 load_dotenv()
 
-tourist_spots = []
-driver = webdriver.Chrome("C:\Program Files (x86)\Chromedriver\chromedriver.exe")
+options = Options()
+options.headless = True
+driver = webdriver.Chrome(os.getenv("CHROME_DRIVER_PATH"), options=options)
 
+tourist_spots = []
 cities = {
     'Santo André': 'https://www.tripadvisor.com.br/Attractions-g303624-Activities-Santo_Andre_State_of_Sao_Paulo.html',
     'São Bernardo do Campo': 'https://www.tripadvisor.com.br/Attractions-g303626-Activities-a_allAttractions.true-Sao_Bernardo_Do_Campo_State_of_Sao_Paulo.html',

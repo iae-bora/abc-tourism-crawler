@@ -1,6 +1,7 @@
 from selenium.common.exceptions import NoSuchElementException
 import time
 from .places import get_place_details
+from config.config import categories_dict
 
 MAX_PAGES = 2
 
@@ -37,18 +38,26 @@ def iterate_cards(cards):
     places_in_page = []
     for card_index in range(len(cards)):
         tourist_spot = get_information_of_place(cards[card_index])
-        places_in_page.append(tourist_spot)
+        if tourist_spot != None:
+            places_in_page.append(tourist_spot)
     
     return places_in_page
 
 def get_information_of_place(card):
     place_information = {}
 
-    place_information['name'] = card.find_element_by_xpath(".//span[@name='title']").text.split('.')[-1].strip()
-    
-    category = card.find_element_by_xpath(".//span/div/div/div[2]/div[2]/div[1]/div/div/div[1]").text.split(' • ') or []
-    place_information['category'] = ','.join(category)
+    categories_from_tripadvisor = card.find_element_by_xpath(".//span/div/div/div[2]/div[2]/div[1]/div/div/div[1]").text.split(' • ') or []
 
+    place_information['category'] = ''
+    for category_key, categories_variations in categories_dict.items():
+        if any(category in ','.join(categories_from_tripadvisor).lower() for category in categories_variations):
+            place_information['category'] = category_key
+            break
+    
+    if place_information['category'] == '':
+        return None
+
+    place_information['name'] = card.find_element_by_xpath(".//span[@name='title']").text.split('.', 1)[-1].strip()
     try:
         place_information['image'] = card.find_element_by_tag_name('img').get_attribute('src')
     except NoSuchElementException:

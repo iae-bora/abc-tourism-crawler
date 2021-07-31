@@ -4,11 +4,10 @@ categories_dict = {
     'Cinema': ['cinema'],
     'Shopping': ['shopping', 'lojas especializadas', 'outlet', 'calçadões'],
     'Bar': ['bar', 'bares', 'cervejarias', 'balada'],
+    'Restaurante': ['restaurante', 'feira'],
     'Show': ['show'],
     'Biblioteca': ['biblioteca'],
     'Estádio': ['estádio', 'arenas', 'esportivo'],
     'Jogos': ['jogos', 'boliche', 'entretenimento', 'stand de tiro'],
     'Teatro': ['teatro']
 }
-# Excursões gastronômicas
-# Feiras livres

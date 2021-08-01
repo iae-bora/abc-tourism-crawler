@@ -32,4 +32,4 @@ class SeleniumConfig():
         elif os.getenv('CRAWLER_ENVIRONMENT') == 'production':
             chrome_options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
 
-            self.driver = webdriver.Chrome(execution_path=os.getenv("CHROME_DRIVER_PATH"), chrome_options=chrome_options)
+            self.driver = webdriver.Chrome(executable_path=os.getenv("CHROME_DRIVER_PATH"), chrome_options=chrome_options)

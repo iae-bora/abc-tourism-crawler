@@ -1,9 +1,11 @@
 from selenium.common.exceptions import NoSuchElementException
 import time
 from .places import get_place_details
-from config.config import categories_dict
+from config.config import PlacesConfig
 
 MAX_PAGES = 2
+places_config = PlacesConfig()
+categories_dict = places_config.categories_dict
 
 def web_scrape_city_pages(url, driver):
     places = []
@@ -13,11 +15,11 @@ def web_scrape_city_pages(url, driver):
 
     try:
         for page in range(0, MAX_PAGES):
-            time.sleep(3)
+            time.sleep(5)
             card_containers = driver.find_elements_by_xpath(".//div[@data-automation='cardWrapper']")
             places.extend(iterate_cards(card_containers))
             
-            time.sleep(3)
+            time.sleep(5)
             driver.find_element_by_xpath("//a[@aria-label='Próxima página']").click()
     except NoSuchElementException:
         print('No more pages found')
@@ -28,7 +30,7 @@ def web_scrape_city_pages(url, driver):
 
 def check_cookies_banner_exists(driver):
     try:
-        time.sleep(3)
+        time.sleep(5)
         driver.find_element_by_xpath("//button[@class='evidon-banner-acceptbutton']").click()
     except:
         print('No cookies banner found')

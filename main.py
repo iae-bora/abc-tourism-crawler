@@ -1,15 +1,12 @@
 from controllers.crawler import web_scrape_city_pages
 import pandas as pd
-import os
 from dotenv import load_dotenv
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from config.config import SeleniumConfig
 
 load_dotenv()
 
-options = Options()
-options.headless = True
-driver = webdriver.Chrome(os.getenv("CHROME_DRIVER_PATH"), options=options)
+selenium_config = SeleniumConfig()
+driver = selenium_config.driver
 
 tourist_spots = []
 cities = {

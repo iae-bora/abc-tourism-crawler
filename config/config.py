@@ -1,6 +1,5 @@
 import os
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 class PlacesConfig():
@@ -21,10 +20,16 @@ class PlacesConfig():
 
 class SeleniumConfig():
     def __init__(self):
-        options = Options()
-        options.headless = True
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--headless')
 
         if os.getenv('CRAWLER_ENVIRONMENT') == 'dev':
-            self.driver = webdriver.Chrome(os.getenv("CHROME_DRIVER_PATH"), options=options)
+            self.driver = webdriver.Chrome(os.getenv("CHROME_DRIVER_PATH"), chrome_options=chrome_options)
         elif os.getenv('CRAWLER_ENVIRONMENT') == 'sandbox':
-            self.driver = webdriver.Remote(command_executor='http://localhost:4444/wd/hub', options=options, desired_capabilities=DesiredCapabilities.CHROME)
+            self.driver = webdriver.Remote(command_executor='http://localhost:4444/wd/hub', chrome_options=chrome_options, desired_capabilities=DesiredCapabilities.CHROME)
+        elif os.getenv('CRAWLER_ENVIRONMENT') == 'production':
+            chrome_options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
+
+            self.driver = webdriver.Chrome(execution_path=os.getenv("CHROME_DRIVER_PATH"), chrome_options=chrome_options)

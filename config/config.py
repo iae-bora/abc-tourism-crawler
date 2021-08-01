@@ -30,6 +30,7 @@ class SeleniumConfig():
         elif os.getenv('CRAWLER_ENVIRONMENT') == 'sandbox':
             self.driver = webdriver.Remote(command_executor='http://localhost:4444/wd/hub', chrome_options=chrome_options, desired_capabilities=DesiredCapabilities.CHROME)
         elif os.getenv('CRAWLER_ENVIRONMENT') == 'production':
+            chrome_options.add_argument('--disable-dev-shm-usage')
             chrome_options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
 
             self.driver = webdriver.Chrome(executable_path=os.getenv("CHROME_DRIVER_PATH"), chrome_options=chrome_options)

@@ -1,29 +1,17 @@
 from controllers.crawler import web_scrape_city_pages
 import pandas as pd
-import os
 from dotenv import load_dotenv
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from config import SeleniumConfig, Config
 
 load_dotenv()
 
-options = Options()
-options.headless = True
-driver = webdriver.Chrome(os.getenv("CHROME_DRIVER_PATH"), options=options)
+selenium_config = SeleniumConfig()
+driver = selenium_config.driver
 
 tourist_spots = []
-cities = {
-    'Santo André': 'https://www.tripadvisor.com.br/Attractions-g303624-Activities-Santo_Andre_State_of_Sao_Paulo.html',
-    'São Bernardo do Campo': 'https://www.tripadvisor.com.br/Attractions-g303626-Activities-a_allAttractions.true-Sao_Bernardo_Do_Campo_State_of_Sao_Paulo.html',
-    'São Caetano do Sul': 'https://www.tripadvisor.com.br/Attractions-g1162161-Activities-Sao_Caetano_do_Sul_State_of_Sao_Paulo.html',
-    'Diadema': 'https://www.tripadvisor.com.br/Attractions-g780021-Activities-Diadema_State_of_Sao_Paulo.html',
-    'Mauá': 'https://www.tripadvisor.com.br/Attractions-g2342768-Activities-Maua_State_of_Sao_Paulo.html',
-    'Ribeirão Pires': 'https://www.tripadvisor.com.br/Attractions-g2343028-Activities-Ribeirao_Pires_State_of_Sao_Paulo.html',
-    'Rio Grande da Serra': 'https://www.tripadvisor.com.br/Attractions-g2346575-Activities-Rio_Grande_Da_Serra_State_of_Sao_Paulo.html'
-}
 
-for city in cities:
-    tourist_spots.extend(web_scrape_city_pages(cities[city], driver))
+for city in Config.CITIES_LIST:
+    tourist_spots.extend(web_scrape_city_pages(Config.CITIES_LIST[city], driver))
 
 driver.close()
 

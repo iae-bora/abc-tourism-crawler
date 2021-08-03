@@ -1,7 +1,7 @@
 from selenium.common.exceptions import NoSuchElementException
 import time
 from .places import get_place_details
-from config.config import categories_dict
+from config import Config
 
 MAX_PAGES = 2
 
@@ -13,11 +13,11 @@ def web_scrape_city_pages(url, driver):
 
     try:
         for page in range(0, MAX_PAGES):
-            time.sleep(3)
+            time.sleep(Config.SLEEP_INTERVAL)
             card_containers = driver.find_elements_by_xpath(".//div[@data-automation='cardWrapper']")
             places.extend(iterate_cards(card_containers))
             
-            time.sleep(3)
+            time.sleep(Config.SLEEP_INTERVAL)
             driver.find_element_by_xpath("//a[@aria-label='Próxima página']").click()
     except NoSuchElementException:
         print('No more pages found')
@@ -28,7 +28,7 @@ def web_scrape_city_pages(url, driver):
 
 def check_cookies_banner_exists(driver):
     try:
-        time.sleep(3)
+        time.sleep(Config.SLEEP_INTERVAL)
         driver.find_element_by_xpath("//button[@class='evidon-banner-acceptbutton']").click()
     except:
         print('No cookies banner found')
@@ -49,7 +49,7 @@ def get_information_of_place(card):
     categories_from_tripadvisor = card.find_element_by_xpath(".//span/div/div/div[2]/div[2]/div[1]/div/div/div[1]").text.split(' • ') or []
 
     place_information['category'] = ''
-    for category_key, categories_variations in categories_dict.items():
+    for category_key, categories_variations in Config.CATEGORIES_DICT.items():
         if any(category in ','.join(categories_from_tripadvisor).lower() for category in categories_variations):
             place_information['category'] = category_key
             break

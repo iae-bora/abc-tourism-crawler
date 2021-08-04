@@ -29,6 +29,16 @@ class Config:
         'Rio Grande da Serra': 'https://www.tripadvisor.com.br/Attractions-g2346575-Activities-Rio_Grande_Da_Serra_State_of_Sao_Paulo.html'
     }
 
+    CITY_RESTAURANTS_LIST = {
+        'Santo André': 'https://www.tripadvisor.com.br/Restaurants-g303624-Santo_Andre_State_of_Sao_Paulo.html',
+        'São Bernardo do Campo': 'https://www.tripadvisor.com.br/Restaurants-g303626-Sao_Bernardo_Do_Campo_State_of_Sao_Paulo.html',
+        'São Caetano do Sul': 'https://www.tripadvisor.com.br/Restaurants-g1162161-Sao_Caetano_do_Sul_State_of_Sao_Paulo.html',
+        'Diadema': 'https://www.tripadvisor.com.br/Restaurants-g780021-Diadema_State_of_Sao_Paulo.html',
+        'Mauá': 'https://www.tripadvisor.com.br/Restaurants-g2342768-Maua_State_of_Sao_Paulo.html',
+        'Ribeirão Pires': 'https://www.tripadvisor.com.br/Restaurants-g2343028-Ribeirao_Pires_State_of_Sao_Paulo.html',
+        'Rio Grande da Serra': 'https://www.tripadvisor.com.br/Restaurants-g2346575-Rio_Grande_Da_Serra_State_of_Sao_Paulo.html'
+    }
+
 class SeleniumConfig():
     def __init__(self):
         chrome_options = webdriver.ChromeOptions()

@@ -19,6 +19,17 @@ class Config:
         'Teatro': ['teatro']
     }
 
+    RESTAURANT_CATEGORIES_DICT = {
+        'Churrasco': ['churrasco', 'steakhouse', 'argentina', 'grelhado'],
+        'Japonesa': ['japonesa', 'sushi'],
+        'Italiana': ['italiana', 'pizza'],
+        'Fast food': ['fast food', 'lanchonete', 'americana'],
+        'Vegetariana': ['vegetariana', 'saudável'],
+        'Bar': ['bar', 'pub', 'wine bar'],
+        'Caseira': ['caseira', 'brasileira'],
+        'Outros': ['mexicana', 'francesa', 'frutos do mar', 'árabe', 'libanesa']
+    }
+
     CITIES_LIST = {
         'Santo André': 'https://www.tripadvisor.com.br/Attractions-g303624-Activities-Santo_Andre_State_of_Sao_Paulo.html',
         'São Bernardo do Campo': 'https://www.tripadvisor.com.br/Attractions-g303626-Activities-a_allAttractions.true-Sao_Bernardo_Do_Campo_State_of_Sao_Paulo.html',

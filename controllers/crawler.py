@@ -3,8 +3,6 @@ import time
 from .places import get_place_details
 from config import Config
 
-MAX_PAGES = 2
-
 class Crawler:
     def __init__(self):
         self.card_wrapper_list_xpath = ""
@@ -22,7 +20,7 @@ class Crawler:
         self.check_cookies_banner_exists(driver)
 
         try:
-            for page in range(0, MAX_PAGES):
+            for page in range(0, Config.MAX_PAGES_PER_CITY):
                 time.sleep(Config.SLEEP_INTERVAL)
                 card_wrapper_list = driver.find_elements_by_xpath(self.card_wrapper_list_xpath)
                 places.extend(self.iterate_cards(card_wrapper_list))
@@ -70,6 +68,9 @@ class Crawler:
         place_information['name'] = card.find_element_by_xpath(self.place_name_xpath).text.split('.', 1)[-1].strip()
         place_information['image'] = self.get_image_from_card(card)
 
+        # place_details = get_place_details(place_information['name'])
+        # place_information.update(place_details)
+
         return place_information
 
 
@@ -109,26 +110,3 @@ class RestaurantCrawler(Crawler):
         except NoSuchElementException:
             image = ''
         return image
-
-
-# def get_infos(card):
-#     local = {}
-
-#     # Obter nome
-#     local['name'] = card.find(
-#         'div', {'class': '_1gpq3zsA _1zP41Z7X'}).get_text().split('.')[-1].strip()
-#     print(local['name'])
-#     # Obter categorias
-#     local['category'] = card.find(
-#         'div', {'class': 'DrjyGw-P _26S7gyB4 _3SccQt-T'}).get_text().split(' • ') or []
-#     local['category'] = ','.join(local['category'])
-
-#     # Obter uma imagem
-#     image = card.find('img')
-#     local['image'] = image.get('src') if image != None else ''
-    
-#     place_details = get_place_details(local['name'])
-#     print(place_details)
-#     local.update(place_details)
-
-#     return local

@@ -3,7 +3,9 @@ from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 class Config:
-    SLEEP_INTERVAL = 15
+    SLEEP_INTERVAL = os.getenv('SLEEP_INTERVAL', 5)
+
+    MAX_PAGES_PER_CITY = os.getenv('MAX_PAGES_PER_CITY', 2)
 
     CATEGORIES_DICT = {
         'Parque': ['parque', 'parques de diversões', 'ar livre', 'bonde', 'natureza', 'trilha'],

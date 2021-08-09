@@ -57,7 +57,7 @@ class SeleniumConfig():
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless')
+        # chrome_options.add_argument('--headless')
 
         if os.getenv('CRAWLER_ENVIRONMENT') == 'dev':
             self.driver = webdriver.Chrome(os.getenv("CHROME_DRIVER_PATH"), chrome_options=chrome_options)
@@ -68,3 +68,13 @@ class SeleniumConfig():
             chrome_options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
 
             self.driver = webdriver.Chrome(executable_path=os.getenv("CHROME_DRIVER_PATH"), chrome_options=chrome_options)
+
+# from sqlalchemy import create_engine
+# from sqlalchemy.orm import sessionmaker
+
+# class Database():
+#     def __init__(self):
+#         # self.db = create_engine('sqlite://')
+#         self.engine = create_engine('sqlite:///:memory:', echo=True)
+#         Session = sessionmaker(bind=self.engine)
+#         self.session = Session()

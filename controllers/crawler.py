@@ -51,6 +51,7 @@ class Crawler:
             place = self.get_information_of_place(cards[card_index])
             if place != None:
                 places_in_page.append(place)
+                self.insert_place_in_database(place)
         
         return places_in_page
 
@@ -79,12 +80,11 @@ class Crawler:
         place.category = place_information['category']
         place.image = place_information['image']
 
+        return place
+    
+    def insert_place_in_database(self, place):
         self.db.session.add(place)
         self.db.session.commit()
-
-        # return place_information
-        return place
-
 
 class PlacesCrawler(Crawler):
     def __init__(self):

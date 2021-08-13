@@ -1,10 +1,13 @@
 from selenium.common.exceptions import NoSuchElementException
 import time
+from models.place import Place
 from .places import get_place_details
 from config import Config
+from database.db import Database
 
 class Crawler:
     def __init__(self):
+        self.db = Database()
         self.card_wrapper_list_xpath = ""
         self.next_page_xpath = ""
         self.categories_xpath = ""
@@ -71,11 +74,21 @@ class Crawler:
         # place_details = get_place_details(place_information['name'])
         # place_information.update(place_details)
 
-        return place_information
+        place = Place()
+        place.name = place_information['name']
+        place.category = place_information['category']
+        place.image = place_information['image']
+
+        self.db.session.add(place)
+        self.db.session.commit()
+
+        # return place_information
+        return place
 
 
 class PlacesCrawler(Crawler):
     def __init__(self):
+        self.db = Database()
         self.card_wrapper_list_xpath = ".//div[@data-automation='cardWrapper']"
         self.next_page_xpath = "//a[@aria-label='Próxima página']"
         self.categories_xpath = ".//span/div/div/div[2]/div[2]/div[1]/div/div/div[1]"
@@ -94,6 +107,7 @@ class PlacesCrawler(Crawler):
 
 class RestaurantCrawler(Crawler):
     def __init__(self):
+        self.db = Database()
         self.card_wrapper_attribute_name = 'data-test'
         self.card_wrapper_list_xpath = f"//div[contains(@{self.card_wrapper_attribute_name}, '_list_item')]"
         self.next_page_xpath = "//a[contains(text(), 'Próximas')]"

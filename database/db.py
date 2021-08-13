@@ -2,9 +2,11 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///db.sqlite')
+class Database:
+    def __init__(self):
+        DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///db.sqlite')
+        print(DATABASE_URL)
+        engine = create_engine(DATABASE_URL, echo=True)
 
-engine = create_engine(DATABASE_URL, echo=True)
-
-Session = sessionmaker(bind=engine)
-session = Session()
+        Session = sessionmaker(bind=engine)
+        self.session = Session()

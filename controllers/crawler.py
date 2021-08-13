@@ -1,4 +1,5 @@
 from selenium.common.exceptions import NoSuchElementException
+from sqlalchemy import select
 import time
 from models.place import Place
 from .places import get_place_details
@@ -56,35 +57,44 @@ class Crawler:
         return places_in_page
 
     def get_information_of_place(self, card):
-        place_information = {}
+        place = Place()
 
         categories_from_tripadvisor = card.find_element_by_xpath(self.categories_xpath).text.split(' • ') or []
 
-        place_information['category'] = ''
+        place.category = ''
         for category_key, categories_variations in self.categories_dictionary.items():
             if any(category in ','.join(categories_from_tripadvisor).lower() for category in categories_variations):
-                place_information['category'] = category_key
+                place.category = category_key
                 break
         
-        if place_information['category'] == '':
+        if place.category == '':
             return None
 
-        place_information['name'] = card.find_element_by_xpath(self.place_name_xpath).text.split('.', 1)[-1].strip()
-        place_information['image'] = self.get_image_from_card(card)
+        place.name = card.find_element_by_xpath(self.place_name_xpath).text.split('.', 1)[-1].strip()
+        
+        place_already_exist = self.check_if_place_already_exist(place)
+        if place_already_exist == True:
+            return None
+
+        place.image = self.get_image_from_card(card)
 
         # place_details = get_place_details(place_information['name'])
         # place_information.update(place_details)
-
-        place = Place()
-        place.name = place_information['name']
-        place.category = place_information['category']
-        place.image = place_information['image']
 
         return place
     
     def insert_place_in_database(self, place):
         self.db.session.add(place)
         self.db.session.commit()
+    
+    def check_if_place_already_exist(self, new_place):
+        statement = select(Place).where(Place.name == new_place.name)
+        result = self.db.session.execute(statement).first()
+
+        if result is None:
+            return False
+        else:
+            return True
 
 class PlacesCrawler(Crawler):
     def __init__(self):

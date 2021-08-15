@@ -84,8 +84,11 @@ class Crawler:
         return place
     
     def insert_place_in_database(self, place):
-        self.db.session.add(place)
-        self.db.session.commit()
+        try:
+            self.db.session.add(place)
+            self.db.session.commit()
+        except Exception as e:
+            print(f'[ERROR] Database error: {str(e)}')
     
     def check_if_place_already_exist(self, new_place):
         statement = select(Place).where(Place.name == new_place.name)

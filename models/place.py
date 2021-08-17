@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, ForeignKey
 from models import Base
 
 class Place(Base):
@@ -6,5 +6,6 @@ class Place(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    category = Column(String)
     image = Column(String)
+    city_id = Column(Integer, ForeignKey("city.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("category.id"), nullable=False)

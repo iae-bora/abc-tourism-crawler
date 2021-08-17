@@ -3,3 +3,5 @@ numpy==1.21.0
 pandas==1.2.5
 requests==2.23.0
 python-dotenv==0.13.0
+sqlalchemy==1.4.19
+pymssql==2.2.2

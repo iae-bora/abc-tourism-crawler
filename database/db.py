@@ -7,7 +7,7 @@ load_dotenv()
 class Database:
     def __init__(self):
         DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///db.sqlite')
-        self.engine = create_engine(DATABASE_URL, echo=True)
+        self.engine = create_engine(f'{DATABASE_URL}?charset=utf8', echo=True)
 
         Session = sessionmaker(bind=self.engine)
         self.session = Session()

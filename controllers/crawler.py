@@ -58,6 +58,7 @@ class Crawler:
             if place != None:
                 places_in_page.append(place)
                 self.insert_place_in_database(place)
+            break
         
         return places_in_page
 
@@ -85,8 +86,22 @@ class Crawler:
         place.image = self.get_image_from_card(card)
         place.city_id = city_id
 
-        # place_details = get_place_details(place_information['name'])
-        # place_information.update(place_details)
+        place_details = get_place_details(place.name)
+        if place_details == {}:
+            return None
+        
+        place.business_status = place_details["business_status"]
+        place.address = place_details["formatted_address"]
+        place.phone = place_details["formatted_phone_number"]
+        place.rating = place_details["rating"]
+        place.latitude = place_details["geometry"]["location"]["lat"]
+        place.longitude = place_details["geometry"]["location"]["lng"]
+
+        opening_hours = {}
+        for weekday_text in place_details["opening_hours"]["weekday_text"]:
+            weekday, opening_hour = weekday_text.split(':', 1)
+            opening_hours.update({weekday: opening_hour.strip()})
+        place.opening_hours = opening_hours
 
         return place
     

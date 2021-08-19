@@ -3,7 +3,7 @@ import requests, os
 def get_place_id(name):
     response = requests.get(
         'https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input={0}&inputtype=textquery&key={1}'.format(name, os.getenv('GOOGLE_PLACES_API_KEY'))).json()
-    print(response)
+    
     place_id = None if len(response['candidates']) == 0 else response['candidates'][0]['place_id']
     return place_id
 

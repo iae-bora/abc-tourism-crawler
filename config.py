@@ -25,7 +25,7 @@ class Config:
         'Churrasco': ['churrasco', 'steakhouse', 'argentina', 'grelhado'],
         'Japonesa': ['japonesa', 'sushi'],
         'Italiana': ['italiana', 'pizza'],
-        'Fast food': ['fast food', 'lanchonete', 'americana'],
+        'FastFood': ['fast food', 'lanchonete', 'americana'],
         'Vegetariana': ['vegetariana', 'saudável'],
         'Bar': ['bar', 'pub', 'wine bar'],
         'Caseira': ['caseira', 'brasileira'],

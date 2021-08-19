@@ -16,3 +16,4 @@ class Place(Base):
     opening_hours = Column(JSON)
     city_id = Column(Integer, ForeignKey("city.id"), nullable=False)
     category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
+    restaurant_category_id = Column(Integer, ForeignKey("restaurant_category.id"), nullable=True)

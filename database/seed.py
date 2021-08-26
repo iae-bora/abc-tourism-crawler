@@ -20,6 +20,7 @@ def load_categories_to_database():
 
 def load_restaurant_categories_to_database():
     restaurant_categories_list = list(Config.RESTAURANT_CATEGORIES_DICT.keys())
+    restaurant_categories_list.remove('Bar')
     for restaurant_category in restaurant_categories_list:
         database.session.add(RestaurantCategory(name=restaurant_category))
         database.session.commit()

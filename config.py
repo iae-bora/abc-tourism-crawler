@@ -5,7 +5,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 class Config:
     SLEEP_INTERVAL = os.getenv('SLEEP_INTERVAL', 5)
 
-    MAX_PAGES_PER_CITY = os.getenv('MAX_PAGES_PER_CITY', 2)
+    MAX_PAGES_PER_CITY = os.getenv('MAX_PAGES_PER_CITY', 1)
 
     CATEGORIES_DICT = {
         'Parque': ['parque', 'parques de diversões', 'ar livre', 'bonde', 'natureza', 'trilha'],
@@ -28,8 +28,8 @@ class Config:
         'FastFood': ['fast food', 'lanchonete', 'americana'],
         'Vegetariana': ['vegetariana', 'saudável'],
         'Bar': ['bar', 'pub', 'wine bar'],
-        'Caseira': ['caseira', 'brasileira'],
-        'Outros': ['mexicana', 'francesa', 'frutos do mar', 'árabe', 'libanesa']
+        'Outros': ['mexicana', 'francesa', 'frutos do mar', 'árabe', 'libanesa'],
+        'Caseira': ['caseira', 'brasileira']
     }
 
     CITIES_LIST = {

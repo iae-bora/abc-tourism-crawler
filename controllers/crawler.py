@@ -8,6 +8,7 @@ from database.db import Database
 from models.place import Place
 from models.city import City
 from models.category import Category
+from models.restaurant_category import RestaurantCategory
 
 class Crawler:
     def __init__(self):
@@ -77,6 +78,8 @@ class Crawler:
             return None
 
         place.category_id = self.get_id_from_category(category)
+        place.restaurant_category_id = None
+        
         place.name = card.find_element_by_xpath(self.place_name_xpath).text.split('.', 1)[-1].strip()
         
         place_already_exist = self.check_if_place_already_exist(place)
@@ -90,19 +93,7 @@ class Crawler:
         if place_details == {}:
             return None
         
-        place.business_status = place_details["business_status"]
-        place.address = place_details["formatted_address"]
-        place.phone = place_details["formatted_phone_number"]
-        place.rating = place_details["rating"]
-        place.latitude = place_details["geometry"]["location"]["lat"]
-        place.longitude = place_details["geometry"]["location"]["lng"]
-
-        opening_hours = {}
-        for weekday_text in place_details["opening_hours"]["weekday_text"]:
-            weekday, opening_hour = weekday_text.split(':', 1)
-            opening_hours.update({weekday: opening_hour.strip()})
-        place.opening_hours = opening_hours
-
+        place = self.fill_place_with_details(place, place_details)
         return place
     
     def insert_place_in_database(self, place):
@@ -115,7 +106,7 @@ class Crawler:
     def get_id_from_city(self, city_name):
         city = self.db.session.query(City).filter_by(name=city_name).first()
         return city.id
-    
+
     def get_id_from_category(self, category_name):
         category = self.db.session.query(Category).filter_by(name=category_name).first()
         return category.id
@@ -128,6 +119,23 @@ class Crawler:
             return False
         else:
             return True
+
+    def fill_place_with_details(self, place: Place, details: dict):
+        place.business_status = details["business_status"]
+        place.address = details["formatted_address"]
+        place.phone = details["formatted_phone_number"]
+        place.rating = details["rating"]
+        place.latitude = details["geometry"]["location"]["lat"]
+        place.longitude = details["geometry"]["location"]["lng"]
+
+        opening_hours = {}
+        for weekday_text in details["opening_hours"]["weekday_text"]:
+            weekday, opening_hour = weekday_text.split(':', 1)
+            opening_hours.update({weekday: opening_hour.strip()})
+        place.opening_hours = opening_hours
+
+        return place
+        
 
 class PlacesCrawler(Crawler):
     def __init__(self):
@@ -159,6 +167,7 @@ class RestaurantCrawler(Crawler):
         self.place_name_xpath = ".//span/div[1]/div[2]/div[1]/div/span/a"
         self.place_image_location = ".//span/div[1]/div[1]/span/a/div[2]/div/div[1]/ul/li[1]/div"
         self.image_property = "background-image"
+        self.category_id = self.get_id_from_category('Restaurante')
     
     def get_image_from_card(self, card):
         image = ''
@@ -167,3 +176,44 @@ class RestaurantCrawler(Crawler):
         except NoSuchElementException:
             image = ''
         return image
+
+    def get_id_from_restaurant_category(self, restaurant_category_name):
+        restaurant_category = self.db.session.query(RestaurantCategory).filter_by(name=restaurant_category_name).first()
+        return restaurant_category.id
+
+    def get_information_of_place(self, card, city_id):
+        place = Place()
+
+        categories_from_tripadvisor = card.find_element_by_xpath(self.categories_xpath).text.split(' • ') or []
+
+        category = ''
+        for category_key, categories_variations in self.categories_dictionary.items():
+            if any(category in ','.join(categories_from_tripadvisor).lower() for category in categories_variations):
+                category = category_key
+                break
+        
+        if category == '':
+            return None
+        
+        if category == 'Bar':
+            place.category_id = self.get_id_from_category(category)
+            place.restaurant_category_id = None
+        else:
+            place.category_id = self.category_id
+            place.restaurant_category_id = self.get_id_from_restaurant_category(category)
+        
+        place.name = card.find_element_by_xpath(self.place_name_xpath).text.split('.', 1)[-1].strip()
+        
+        place_already_exist = self.check_if_place_already_exist(place)
+        if place_already_exist == True:
+            return None
+
+        place.image = self.get_image_from_card(card)
+        place.city_id = city_id
+
+        place_details = get_place_details(place.name)
+        if place_details == {}:
+            return None
+        
+        place = self.fill_place_with_details(place, place_details)
+        return place

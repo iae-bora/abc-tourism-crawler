@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
+from sqlalchemy import Column, String, Integer, Boolean, Time, ForeignKey
 from models import Base
 
 class OpeningHours(Base):
@@ -7,6 +7,6 @@ class OpeningHours(Base):
     id = Column(Integer, primary_key=True)
     day_of_week = Column(String)
     open = Column(Boolean)
-    start_hour = Column(String, nullable=True)
-    end_hour = Column(String, nullable=True)
+    start_hour = Column(Time, nullable=True)
+    end_hour = Column(Time, nullable=True)
     place_id = Column(Integer, ForeignKey("place.id"), nullable=False)

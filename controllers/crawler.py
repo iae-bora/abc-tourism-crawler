@@ -1,9 +1,10 @@
 from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import select
-import time
+import time as timer
 from .places import get_place_details
 from config import Config
 from database.db import Database
+from datetime import time
 
 from models.place import Place
 from models.city import City
@@ -32,11 +33,11 @@ class Crawler:
 
         try:
             for page in range(0, Config.MAX_PAGES_PER_CITY):
-                time.sleep(Config.SLEEP_INTERVAL)
+                timer.sleep(Config.SLEEP_INTERVAL)
                 card_wrapper_list = driver.find_elements_by_xpath(self.card_wrapper_list_xpath)
                 places.extend(self.iterate_cards(card_wrapper_list, city_id))
                 
-                time.sleep(Config.SLEEP_INTERVAL)
+                timer.sleep(Config.SLEEP_INTERVAL)
                 driver.find_element_by_xpath(self.next_page_xpath).click()
         except NoSuchElementException:
             print('No more pages found')
@@ -47,7 +48,7 @@ class Crawler:
 
     def check_cookies_banner_exists(self, driver):
         try:
-            time.sleep(Config.SLEEP_INTERVAL)
+            timer.sleep(Config.SLEEP_INTERVAL)
             driver.find_element_by_xpath("//button[@class='evidon-banner-acceptbutton']").click()
         except:
             print('No cookies banner found')
@@ -153,12 +154,15 @@ class Crawler:
                 opening_hours.open = True
 
                 if opening_hour == 'Aberto 24 horas':
-                    opening_hours.start_hour = '0:00'
-                    opening_hours.end_hour = '23:59'
+                    opening_hours.start_hour = time(0, 0, 0)
+                    opening_hours.end_hour = time(23, 59, 59)
                 else:
                     start_hour, end_hour = opening_hour.strip().split(' – ')
-                    opening_hours.start_hour = start_hour
-                    opening_hours.end_hour = end_hour
+                    start_hour_hours, start_hour_minutes = start_hour.split(':')
+                    end_hour_hours, end_hour_minutes = end_hour.split(':')
+                    
+                    opening_hours.start_hour = time(int(start_hour_hours), int(start_hour_minutes), 0)
+                    opening_hours.end_hour = time(int(end_hour_hours), int(end_hour_minutes), 0)
             
             opening_hours.place_id = place_id
             self.insert_opening_hours_in_database(opening_hours)

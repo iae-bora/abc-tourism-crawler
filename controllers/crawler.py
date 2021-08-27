@@ -138,7 +138,7 @@ class Crawler:
             opening_hours = OpeningHours()
             opening_hours.day_of_week = day_of_week
             
-            if opening_hour == 'Fechado':
+            if opening_hour.strip() == 'Fechado':
                 opening_hours.open = False
             else:
                 opening_hours.open = True

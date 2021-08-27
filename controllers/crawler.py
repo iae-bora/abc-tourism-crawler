@@ -24,8 +24,6 @@ class Crawler:
         self.image_property = ""
     
     def web_scrape_pages(self, city, url, driver):
-        places = []
-
         driver.get(url)
         self.check_cookies_banner_exists(driver)
 
@@ -35,7 +33,7 @@ class Crawler:
             for page in range(0, Config.MAX_PAGES_PER_CITY):
                 timer.sleep(Config.SLEEP_INTERVAL)
                 card_wrapper_list = driver.find_elements_by_xpath(self.card_wrapper_list_xpath)
-                places.extend(self.iterate_cards(card_wrapper_list, city_id))
+                self.iterate_cards(card_wrapper_list, city_id)
                 
                 timer.sleep(Config.SLEEP_INTERVAL)
                 driver.find_element_by_xpath(self.next_page_xpath).click()
@@ -43,8 +41,6 @@ class Crawler:
             print('No more pages found')
         except Exception as e:
             print('Error: ' + str(e))
-        
-        return places
 
     def check_cookies_banner_exists(self, driver):
         try:
@@ -55,14 +51,8 @@ class Crawler:
         return
 
     def iterate_cards(self, cards, city_id):
-        places_in_page = []
         for card_index in range(len(cards)):
-            place = self.get_information_of_place(cards[card_index], city_id)
-            if place != None:
-                places_in_page.append(place)
-            break
-        
-        return places_in_page
+            self.get_information_of_place(cards[card_index], city_id)
 
     def get_information_of_place(self, card, city_id):
         place = Place()
@@ -160,7 +150,7 @@ class Crawler:
                     start_hour, end_hour = opening_hour.strip().split(' – ')
                     start_hour_hours, start_hour_minutes = start_hour.split(':')
                     end_hour_hours, end_hour_minutes = end_hour.split(':')
-                    
+
                     opening_hours.start_hour = time(int(start_hour_hours), int(start_hour_minutes), 0)
                     opening_hours.end_hour = time(int(end_hour_hours), int(end_hour_minutes), 0)
             

@@ -143,7 +143,7 @@ class Crawler:
             else:
                 opening_hours.open = True
 
-                if opening_hour == 'Aberto 24 horas':
+                if opening_hour.strip() == 'Atendimento 24 horas':
                     opening_hours.start_hour = time(0, 0, 0)
                     opening_hours.end_hour = time(23, 59, 59)
                 else:

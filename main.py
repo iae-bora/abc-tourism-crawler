@@ -12,7 +12,7 @@ places_crawler = PlacesCrawler()
 restaurant_crawler = RestaurantCrawler()
 
 for city in Config.CITIES_LIST:
-    places_crawler.web_scrape_pages(Config.CITIES_LIST[city], driver)
+    places_crawler.web_scrape_pages(city, Config.CITIES_LIST[city], driver)
 
 for city in Config.CITY_RESTAURANTS_LIST:
     restaurant_crawler.web_scrape_pages(city, Config.CITY_RESTAURANTS_LIST[city], driver)

@@ -9,6 +9,7 @@ from models.place import Place
 from models.city import City
 from models.category import Category
 from models.restaurant_category import RestaurantCategory
+from models.opening_hours import OpeningHours
 
 class Crawler:
     def __init__(self):
@@ -58,7 +59,6 @@ class Crawler:
             place = self.get_information_of_place(cards[card_index], city_id)
             if place != None:
                 places_in_page.append(place)
-                self.insert_place_in_database(place)
             break
         
         return places_in_page
@@ -68,17 +68,7 @@ class Crawler:
 
         categories_from_tripadvisor = card.find_element_by_xpath(self.categories_xpath).text.split(' • ') or []
 
-        category = ''
-        for category_key, categories_variations in self.categories_dictionary.items():
-            if any(category in ','.join(categories_from_tripadvisor).lower() for category in categories_variations):
-                category = category_key
-                break
-        
-        if category == '':
-            return None
-
-        place.category_id = self.get_id_from_category(category)
-        place.restaurant_category_id = None
+        place = self.set_category_to_place(categories_from_tripadvisor, place)
         
         place.name = card.find_element_by_xpath(self.place_name_xpath).text.split('.', 1)[-1].strip()
         
@@ -92,16 +82,22 @@ class Crawler:
         place_details = get_place_details(place.name)
         if place_details == {}:
             return None
-        
         place = self.fill_place_with_details(place, place_details)
+
+        place_id = self.insert_place_in_database(place)
+        if place_id is not None:
+            self.save_opening_hours(place_details["opening_hours"]["weekday_text"], place_id)
+
         return place
     
     def insert_place_in_database(self, place):
         try:
             self.db.session.add(place)
             self.db.session.commit()
+            return place.id
         except Exception as e:
             print(f'[ERROR] Database error: {str(e)}')
+            return None
     
     def get_id_from_city(self, city_name):
         city = self.db.session.query(City).filter_by(name=city_name).first()
@@ -110,6 +106,21 @@ class Crawler:
     def get_id_from_category(self, category_name):
         category = self.db.session.query(Category).filter_by(name=category_name).first()
         return category.id
+    
+    def set_category_to_place(self, categories_from_tripadvisor, place):
+        category = ''
+        for category_key, categories_variations in self.categories_dictionary.items():
+            if any(category in ','.join(categories_from_tripadvisor).lower() for category in categories_variations):
+                category = category_key
+                break
+        
+        if category == '':
+            return None
+
+        place.category_id = self.get_id_from_category(category)
+        place.restaurant_category_id = None
+        
+        return place
     
     def check_if_place_already_exist(self, new_place):
         statement = select(Place).where(Place.name == new_place.name)
@@ -128,13 +139,36 @@ class Crawler:
         place.latitude = details["geometry"]["location"]["lat"]
         place.longitude = details["geometry"]["location"]["lng"]
 
-        opening_hours = {}
-        for weekday_text in details["opening_hours"]["weekday_text"]:
-            weekday, opening_hour = weekday_text.split(':', 1)
-            opening_hours.update({weekday: opening_hour.strip()})
-        place.opening_hours = opening_hours
-
         return place
+    
+    def save_opening_hours(self, weekday_text_list, place_id):
+        for weekday_text in weekday_text_list:
+            day_of_week, opening_hour = weekday_text.split(':', 1)
+            opening_hours = OpeningHours()
+            opening_hours.day_of_week = day_of_week
+            
+            if opening_hour == 'Fechado':
+                opening_hours.open = False
+            else:
+                opening_hours.open = True
+
+                if opening_hour == 'Aberto 24 horas':
+                    opening_hours.start_hour = '0:00'
+                    opening_hours.end_hour = '23:59'
+                else:
+                    start_hour, end_hour = opening_hour.strip().split(' – ')
+                    opening_hours.start_hour = start_hour
+                    opening_hours.end_hour = end_hour
+            
+            opening_hours.place_id = place_id
+            self.insert_opening_hours_in_database(opening_hours)
+    
+    def insert_opening_hours_in_database(self, opening_hours):
+        try:
+            self.db.session.add(opening_hours)
+            self.db.session.commit()
+        except Exception as e:
+            print(f'[ERROR] Database error: {str(e)}')
         
 
 class PlacesCrawler(Crawler):
@@ -180,12 +214,8 @@ class RestaurantCrawler(Crawler):
     def get_id_from_restaurant_category(self, restaurant_category_name):
         restaurant_category = self.db.session.query(RestaurantCategory).filter_by(name=restaurant_category_name).first()
         return restaurant_category.id
-
-    def get_information_of_place(self, card, city_id):
-        place = Place()
-
-        categories_from_tripadvisor = card.find_element_by_xpath(self.categories_xpath).text.split(' • ') or []
-
+    
+    def set_category_to_place(self, categories_from_tripadvisor, place):
         category = ''
         for category_key, categories_variations in self.categories_dictionary.items():
             if any(category in ','.join(categories_from_tripadvisor).lower() for category in categories_variations):
@@ -202,18 +232,4 @@ class RestaurantCrawler(Crawler):
             place.category_id = self.category_id
             place.restaurant_category_id = self.get_id_from_restaurant_category(category)
         
-        place.name = card.find_element_by_xpath(self.place_name_xpath).text.split('.', 1)[-1].strip()
-        
-        place_already_exist = self.check_if_place_already_exist(place)
-        if place_already_exist == True:
-            return None
-
-        place.image = self.get_image_from_card(card)
-        place.city_id = city_id
-
-        place_details = get_place_details(place.name)
-        if place_details == {}:
-            return None
-        
-        place = self.fill_place_with_details(place, place_details)
         return place

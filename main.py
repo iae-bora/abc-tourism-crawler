@@ -1,5 +1,4 @@
 from controllers.crawler import PlacesCrawler, RestaurantCrawler
-import pandas as pd
 from dotenv import load_dotenv
 from config import SeleniumConfig, Config
 

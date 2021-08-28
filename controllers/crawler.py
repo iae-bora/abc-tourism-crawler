@@ -32,6 +32,7 @@ class Crawler:
         try:
             for page in range(0, Config.MAX_PAGES_PER_CITY):
                 timer.sleep(Config.SLEEP_INTERVAL)
+                print(f'[DEBUG] Page {page} from city {city}')
                 card_wrapper_list = driver.find_elements_by_xpath(self.card_wrapper_list_xpath)
                 self.iterate_cards(card_wrapper_list, city_id)
                 
@@ -52,19 +53,26 @@ class Crawler:
 
     def iterate_cards(self, cards, city_id):
         for card_index in range(len(cards)):
-            self.get_information_of_place(cards[card_index], city_id)
+            try:
+                self.get_information_of_place(cards[card_index], city_id)
+            except Exception as e:
+                print(f'[ERROR] Error retrieving data from place {card_index}: {e}')
 
     def get_information_of_place(self, card, city_id):
         place = Place()
 
-        categories_from_tripadvisor = card.find_element_by_xpath(self.categories_xpath).text.split(' • ') or []
-
-        place = self.set_category_to_place(categories_from_tripadvisor, place)
-        
         place.name = card.find_element_by_xpath(self.place_name_xpath).text.split('.', 1)[-1].strip()
         
         place_already_exist = self.check_if_place_already_exist(place)
         if place_already_exist == True:
+            print(f'[FAILURE] Place {place.name} already exists')
+            return None
+
+        categories_from_tripadvisor = card.find_element_by_xpath(self.categories_xpath).text.split(' • ') or []
+
+        place = self.set_category_to_place(categories_from_tripadvisor, place)
+        if place == None:
+            print(f'Category of {place.name} does not match with list')
             return None
 
         place.image = self.get_image_from_card(card)
@@ -72,12 +80,16 @@ class Crawler:
 
         place_details = get_place_details(place.name)
         if place_details == {}:
+            print(f'[FAILURE] Place {place.name} not found in Google Places')
             return None
         place = self.fill_place_with_details(place, place_details)
 
         place_id = self.insert_place_in_database(place)
-        if place_id is not None:
+        if place_id is not None and "opening_hours" in place_details:
             self.save_opening_hours(place_details["opening_hours"]["weekday_text"], place_id)
+            print(f'[SUCCESS] Opening hours from place {place.name} inserted successfully')
+        else:
+            print(f'[ERROR] {place.name} not inserted in database or does not have opening_hours')
 
         return place
     
@@ -85,6 +97,7 @@ class Crawler:
         try:
             self.db.session.add(place)
             self.db.session.commit()
+            print(f'[SUCCESS] Place inserted successfully: {place.name}')
             return place.id
         except Exception as e:
             print(f'[ERROR] Database error: {str(e)}')
@@ -125,8 +138,8 @@ class Crawler:
     def fill_place_with_details(self, place: Place, details: dict):
         place.business_status = details["business_status"]
         place.address = details["formatted_address"]
-        place.phone = details["formatted_phone_number"]
-        place.rating = details["rating"]
+        place.phone = details.get("formatted_phone_number", None)
+        place.rating = details.get("rating", None)
         place.latitude = details["geometry"]["location"]["lat"]
         place.longitude = details["geometry"]["location"]["lng"]
 

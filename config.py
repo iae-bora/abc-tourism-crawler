@@ -5,7 +5,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 class Config:
     SLEEP_INTERVAL = os.getenv('SLEEP_INTERVAL', 5)
 
-    MAX_PAGES_PER_CITY = os.getenv('MAX_PAGES_PER_CITY', 1)
+    MAX_PAGES_PER_CITY = os.getenv('MAX_PAGES_PER_CITY', 2)
 
     CATEGORIES_DICT = {
         'Parque': ['parque', 'parques de diversões', 'ar livre', 'bonde', 'natureza', 'trilha'],
@@ -58,6 +58,7 @@ class SeleniumConfig():
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--log-level=3')
 
         if os.getenv('CRAWLER_ENVIRONMENT') == 'dev':
             self.driver = webdriver.Chrome(os.getenv("CHROME_DRIVER_PATH"), chrome_options=chrome_options)

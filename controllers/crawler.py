@@ -1,16 +1,21 @@
 from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import select
 import time as timer
+from datetime import time
+import logging
+
 from .places import get_place_details
 from config import Config
 from database.db import Database
-from datetime import time
 
 from models.place import Place
 from models.city import City
 from models.category import Category
 from models.restaurant_category import RestaurantCategory
 from models.opening_hours import OpeningHours
+
+logging.basicConfig(level=logging.INFO, filename='crawler.log', format='%(asctime)s %(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
 
 class Crawler:
     def __init__(self):
@@ -24,6 +29,7 @@ class Crawler:
         self.image_property = ""
     
     def web_scrape_pages(self, city, url, driver):
+        logger.info(f'Starting city {city}')
         driver.get(url)
         self.check_cookies_banner_exists(driver)
 
@@ -32,23 +38,23 @@ class Crawler:
         try:
             for page in range(0, Config.MAX_PAGES_PER_CITY):
                 timer.sleep(Config.SLEEP_INTERVAL)
-                print(f'[DEBUG] Page {page} from city {city}')
+                logger.info(f'Page {page} from city {city}')
                 card_wrapper_list = driver.find_elements_by_xpath(self.card_wrapper_list_xpath)
                 self.iterate_cards(card_wrapper_list, city_id)
                 
                 timer.sleep(Config.SLEEP_INTERVAL)
                 driver.find_element_by_xpath(self.next_page_xpath).click()
         except NoSuchElementException:
-            print('No more pages found')
+            logger.info(f'No more pages found from city {city}')
         except Exception as e:
-            print('Error: ' + str(e))
+            logger.error('Error in page iteration: ' + str(e))
 
     def check_cookies_banner_exists(self, driver):
         try:
             timer.sleep(Config.SLEEP_INTERVAL)
             driver.find_element_by_xpath("//button[@class='evidon-banner-acceptbutton']").click()
         except:
-            print('No cookies banner found')
+            logger.info('No cookies banner found')
         return
 
     def iterate_cards(self, cards, city_id):
@@ -56,23 +62,24 @@ class Crawler:
             try:
                 self.get_information_of_place(cards[card_index], city_id)
             except Exception as e:
-                print(f'[ERROR] Error retrieving data from place {card_index}: {e}')
+                logger.error(f'Error retrieving data from place {card_index}: {e}')
 
     def get_information_of_place(self, card, city_id):
         place = Place()
 
         place.name = card.find_element_by_xpath(self.place_name_xpath).text.split('.', 1)[-1].strip()
+        logger.info(f"----- Place {place.name} -----")
         
         place_already_exist = self.check_if_place_already_exist(place)
         if place_already_exist == True:
-            print(f'[FAILURE] Place {place.name} already exists')
+            logger.warning(f'Place {place.name} already exists')
             return None
 
         categories_from_tripadvisor = card.find_element_by_xpath(self.categories_xpath).text.split(' • ') or []
 
         place = self.set_category_to_place(categories_from_tripadvisor, place)
         if place == None:
-            print(f'Category of {place.name} does not match with list')
+            logger.warning(f'Category of {place.name} does not match with list')
             return None
 
         place.image = self.get_image_from_card(card)
@@ -80,16 +87,17 @@ class Crawler:
 
         place_details = get_place_details(place.name)
         if place_details == {}:
-            print(f'[FAILURE] Place {place.name} not found in Google Places')
+            logger.error(f'Place {place.name} not found in Google Places')
             return None
         place = self.fill_place_with_details(place, place_details)
 
-        place_id = self.insert_place_in_database(place)
-        if place_id is not None and "opening_hours" in place_details:
-            self.save_opening_hours(place_details["opening_hours"]["weekday_text"], place_id)
-            print(f'[SUCCESS] Opening hours from place {place.name} inserted successfully')
+        if "opening_hours" in place_details:
+            place_id = self.insert_place_in_database(place)
+            if place_id is not None:
+                self.save_opening_hours(place_details["opening_hours"]["weekday_text"], place_id)
+                logger.info(f'Opening hours from place {place.name} inserted successfully')
         else:
-            print(f'[ERROR] {place.name} not inserted in database or does not have opening_hours')
+            logger.error(f'Place {place.name} does not have opening_hours')
 
         return place
     
@@ -97,10 +105,10 @@ class Crawler:
         try:
             self.db.session.add(place)
             self.db.session.commit()
-            print(f'[SUCCESS] Place inserted successfully: {place.name}')
+            logger.info(f'Place inserted successfully: {place.name}')
             return place.id
         except Exception as e:
-            print(f'[ERROR] Database error: {str(e)}')
+            logger.error(f'Database error when inserting place: {str(e)}')
             return None
     
     def get_id_from_city(self, city_name):
@@ -175,7 +183,7 @@ class Crawler:
             self.db.session.add(opening_hours)
             self.db.session.commit()
         except Exception as e:
-            print(f'[ERROR] Database error: {str(e)}')
+            logger.error(f'Database error when inserting opening_hours: {str(e)}')
         
 
 class PlacesCrawler(Crawler):

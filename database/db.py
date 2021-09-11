@@ -9,5 +9,5 @@ class Database:
         DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///db.sqlite')
         self.engine = create_engine(f'{DATABASE_URL}?charset=utf8', echo=False)
 
-        Session = sessionmaker(bind=self.engine)
+        Session = sessionmaker(bind=self.engine, autoflush=False, autocommit=False)
         self.session = Session()

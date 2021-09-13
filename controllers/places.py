@@ -14,7 +14,7 @@ def get_place_details(name):
         return {}
 
     response = requests.get(
-        'https://maps.googleapis.com/maps/api/place/details/json?place_id={0}&language=pt-BR&fields=business_status,formatted_address,geometry/location,name,formatted_phone_number,opening_hours/weekday_text,price_level,rating&key={1}'.format(place_id, os.getenv('GOOGLE_PLACES_API_KEY'))).json()
+        'https://maps.googleapis.com/maps/api/place/details/json?place_id={0}&language=pt-BR&fields=address_components,business_status,formatted_address,geometry/location,name,formatted_phone_number,opening_hours/weekday_text,price_level,rating&key={1}'.format(place_id, os.getenv('GOOGLE_PLACES_API_KEY'))).json()
 
     place_details = {} if response == {} else response['result']
 

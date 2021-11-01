@@ -5,6 +5,7 @@
 <p align="center">
   <a href="#book-about">About</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#%EF%B8%8F-technologies">Technologies</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+  <a href="#cityscape-solution-architecture">Solution architecture</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#computer-running-the-web-crawler">Running the web crawler</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#whale-running-with-docker">Running with Docker</a>
 </p>
@@ -24,6 +25,18 @@ Also, it is being used the Google Places API to get detailed informations (like 
 - [Selenium](https://www.selenium.dev/)
 - [SQLAlchemy](https://www.sqlalchemy.org/)
 - [Google Places API](https://developers.google.com/maps/documentation/places/web-service/overview)
+
+## :cityscape: Solution architecture
+This repository is represented by the number 1 in the architecture, if you want to view the other repositories of the solution, click on one of the items below:
+
+<p align="center">
+  <img src=".github/architecture.png"/>
+</p>
+
+- [(3) Machine Learning](https://github.com/iae-bora/ml-api)
+- [(4) Back-End](https://github.com/iae-bora/back-end)
+- [(5) Front-End](https://github.com/iae-bora/front-end)
+- [(6) Mobile](https://github.com/iae-bora/mobile)
 
 ## :computer: Running the web crawler
 
